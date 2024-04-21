@@ -19,7 +19,6 @@ from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 from datasets import load_dataset
 
-# LangChainDeprecationWarning uyarılarını filtrelemek için
 import warnings
 from langchain._api import LangChainDeprecationWarning
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
@@ -31,13 +30,9 @@ auth_provider = PlainTextAuthProvider(ASTRA_DB_CLIENT_ID, ASTRA_DB_CLIENT_SECRET
 cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
 astraSession = cluster.connect()
 
-# Yeni OpenAI ve OpenAIEmbeddings sınıflarını kullanarak LangChain nesnelerini başlatın
 llm = CommunityOpenAI(openai_api_key=OPENAI_API_KEY)
 myEmbedding = CommunityOpenAIEmbeddings(model="text-embedding-3-small", openai_api_key= OPENAI_API_KEY)
 
-# VectorStoreIndexWrapper ve Cassandra sınıfını kullanımınızın doğru olduğundan emin olun
-# Bu sınıfların kullanımı güncel langchain paketlerinde değişmiş olabilir
-# myCassandraVStore gibi bir sınıf kullanıyorsanız, bu sınıfın güncel kullanımını kontrol edin
 
 from langchain.globals import set_llm_cache
 from langchain_community.cache import CassandraSemanticCache
@@ -71,23 +66,20 @@ my_vector_store_index_wrapper = VectorStoreIndexWrapper(vectorstore=set_llm_cach
 
 
 
-# OpenAIEmbeddings'den alınan sonuçları saklamak için basit bir önbellek yapısı
+# OpenAIEmbeddings'den alınan sonuçları saklamak için önbellek
 embeddings_cache = {}
 
 def get_embedding_with_cache(text):
     if text not in embeddings_cache:
-        # Eğer önbellekte yoksa, OpenAI API'sini çağır
         try:
             embeddings_cache[text] = myEmbedding.embed_query(text)
         except openai.RateLimitError as e:
-            # Rate limit hatası durumunda, kullanıcıyı bilgilendir
             print("Rate limit exceeded, please wait and retry. More info:", e)
-            # Bu durumda işleme devam etmeyin ve bir sonraki çağrı için bekleme yapın
             time.sleep(60)
-            return None  # veya uygun bir hata dönüş değeri
+            return None
     return embeddings_cache[text]
 
-# HuggingFace veri seti yükleme - Eğer gerçekten kullanılacaksa
+
 print("Loading data from huggingface")
 myDataset = load_dataset("Biddls/Onion_News", split="train")
 headlines = myDataset["text"][:50]
@@ -120,7 +112,7 @@ import requests
 
 
 app = FastAPI()
-embedder = Embedder(api_key="sk-proj-uiAMhVTsyLE3Ht4hW2hAT3BlbkFJE22wI4GVSSWVWkPzrHWX")
+embedder = Embedder(api_key="Enter OpenAI api key")
 qdrant_client = QdrantClient(host="localhost", port=6333)
 
 
@@ -139,15 +131,12 @@ def create_collection(collection_name: str, vector_size: int = 128, distance: st
 
     # Qdrant'a koleksiyon oluşturma isteği gönderiyoruz.
     response = qdrant_client.recreate_collection(collection_name=collection_name, vectors_config=vectors_config)
-
     return response
 
 
 
 
-    """Yeni bir koleksiyon oluşturur.
-
-    
+    """Yeni bir koleksiyon oluşturma.
     
     
     
@@ -166,16 +155,14 @@ def create_collection(collection_name: str, vector_size: int = 128, distance: st
 
 @app.get("/list_collections")
 def list_collections():
-    """Veritabanındaki tüm koleksiyonları listeler."""
+    """Veritabanındaki tüm koleksiyonları listeleme"""
 
 
     response = requests.get(QDRANT_COLLECTION_URL)
 
     if response.status_code == 200:
-        # Başarılı yanıtı ve koleksiyonların listesini döndür
         return JSONResponse(status_code=200, content=response.json())
     else:
-        # Bir hata oluştu
         raise HTTPException(status_code=response.status_code, detail=response.text)
 
 
