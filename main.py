@@ -11,7 +11,7 @@ ASTRA_DB_CLIENT_ID = "gvBSjvwOkcIsSZSYUURZjFZs"
 ASTRA_DB_CLIENT_SECRET = "ncethQX4LU+_ZlqgPBLRpwMm.s7fBCtKLRtxdQOGP.bgSx1T.MJAwvYyeO7rHlEpJQ761.TZebT+YAJ4gnpytwkqZZKW_Qn.DQh52cCc_By-zZLKD6c3W1qmKz0jxi.A"
 
 ASTRA_DB_KEYSPACE = "search"
-OPENAI_API_KEY = "sk-proj-dKd017OhrTYudLf9ZnCUT3BlbkFJEZFA32Oy5eFK6ZagSSIb"
+OPENAI_API_KEY = "Enter OpenAI api key!!"
 
 from langchain_community.llms import OpenAI as CommunityOpenAI
 from langchain_community.embeddings import OpenAIEmbeddings as CommunityOpenAIEmbeddings, openai
